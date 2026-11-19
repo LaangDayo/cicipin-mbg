@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Masuk &amp; Daftar Akun — Cicipin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red-dark: #7f1d1d;
+      --red-main: #dc2626;
+      --red-accent: #ea580c;
+      --grad-utama: linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #ea580c 100%);
+      --bg-canvas: #f6f7f9;
+      --surface-card: #ffffff;
+      --surface-sub: #f7f8fa;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border-hairline: #ebedf0;
+      --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.055);
+      --shadow-pill: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-top {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+    .navbar-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      height: 72px;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .brand-logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .nav-pill-hint {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #991b1b;
+    }
+    @media (max-width: 680px) {
+      .nav-pill-hint { display: none; }
+      .navbar-inner { padding: 0 16px; }
+    }
+
+    .btn-pill-secondary {
+      background: #ffffff;
+      color: var(--text-primary);
+      border: 1px solid #e5e7eb;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-pill);
+      transition: all 0.15s;
+    }
+    .btn-pill-secondary:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .btn-pill-primary {
+      background: var(--grad-utama);
+      color: #ffffff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(185, 28, 28, 0.24);
+      transition: opacity 0.15s;
+    }
+    .btn-pill-primary:hover { opacity: 0.93; }
+
+    .auth-container {
+      max-width: 460px;
+      width: 100%;
+      margin: 40px auto 56px;
+      padding: 0 20px;
+      flex: 1;
+    }
+
+    .auth-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-hairline);
+      border-radius: 20px;
+      padding: 28px 30px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .auth-header h1 {
+      margin: 0 0 6px;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      user-select: none;
+      cursor: default;
+    }
+    .auth-header p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .tab-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--surface-sub);
+      border: 1px solid var(--border-hairline);
+      padding: 5px;
+      border-radius: 999px;
+      margin-bottom: 22px;
+    }
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      background: var(--grad-utama);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(185, 28, 28, 0.22);
+    }
+
+    .fld-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .fld-control {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      background: var(--surface-sub);
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      transition: all 0.15s;
+    }
+    .fld-control:focus {
+      outline: none;
+      background: #ffffff;
+      border-color: var(--red-main);
+    }
+
+    .dev-code-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .dev-code-box small {
+      display: block;
+      font-size: 11.5px;
+      color: #991b1b;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .alert-box {
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .alert-box.sukses {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .hidden { display: none !important; }
+
+    .hub-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border-hairline);
+      padding: 20px 28px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar-top">
+    <div class="navbar-inner">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/" class="brand-link">
+          <img src="/CICIPIN.png" alt="Logo Cicipin" class="brand-logo-img" />
+        </a>
+        <span class="nav-pill-hint">Autentikasi Pengguna &amp; Pengunduhan Dataset</span>
+      </div>
+      <a href="/" class="btn-pill-secondary">&larr; Kembali ke Beranda</a>
+    </div>
+  </header>
+
+  <main class="auth-container">
+    <section class="auth-card">
+      <div class="auth-header">
+        <h1 id="judul-auth">Masuk ke Portal</h1>
+        <p id="subjudul-auth">Masuk untuk mengunduh dataset spasial &amp; atribut MBG.</p>
+      </div>
+
+      <div class="tab-switcher">
+        <button type="button" id="tab-masuk" class="tab-btn active" onclick="pilihTab('masuk')">Masuk Akun</button>
+        <button type="button" id="tab-daftar" class="tab-btn" onclick="pilihTab('daftar')">Daftar Baru</button>
+      </div>
+
+      <div id="pesan-auth" class="alert-box hidden"></div>
+
+      <!-- FORM MASUK -->
+      <form id="form-masuk">
+        <label class="fld-label">Alamat Email</label>
+        <input type="email" id="login-email" class="fld-control" placeholder="nama@instansi.go.id" required />
+
+        <label class="fld-label">Kata Sandi</label>
+        <input type="password" id="login-sandi" class="fld-control" placeholder="Masukkan kata sandi" required />
+
+        <button type="submit" id="btn-login" class="btn-pill-primary" style="margin-top:4px;">Masuk Sekarang</button>
+      </form>
+
+      <!-- FORM DAFTAR -->
+      <form id="form-daftar" class="hidden">
+        <input type="hidden" id="reg-peran" value="PENGGUNA" />
+
+        <div id="box-kode-pengembang" class="dev-code-box hidden">
+          <label class="fld-label" style="color:#991b1b;">Kode Otorisasi Pengembang</label>
+          <small>Mode pendaftaran pengembang aktif. Masukkan kode otorisasi internal untuk melanjutkan.</small>
+          <input type="password" id="reg-kode-dev" class="fld-control" style="margin-bottom:0; background:#ffffff;" placeholder="Masukkan kode otorisasi pengembang" />
+        </div>
+
+        <label class="fld-label">Nama Lengkap</label>
+        <input type="text" id="reg-nama" class="fld-control" placeholder="Contoh: Gilang Maulana" required />
+
+        <label class="fld-label">Instansi / Sekolah / Perguruan Tinggi</label>
+        <input type="text" id="reg-instansi" class="fld-control" placeholder="Contoh: ITENAS Bandung / Dinas Pendidikan" required />
+
+        <label class="fld-label">Alamat Email</label>
+        <input type="email" id="reg-email" class="fld-control" placeholder="nama@instansi.ac.id" required />
+
+        <label class="fld-label">Kata Sandi</label>
+        <input type="password" id="reg-sandi" class="fld-control" placeholder="Minimal 6 karakter" minlength="6" required />
+
+        <button type="submit" id="btn-daftar" class="btn-pill-primary" style="margin-top:4px;">Buat Akun Pengguna</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="hub-footer">
+    &copy; 2026 Cicipin &mdash; Umpan Balik Makan Bergizi Gratis Berbasis Lokasi
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const redirectPage = params.get('page');
+    let klikJudulCount = 0;
+    let klikTimer = null;
+
+    function perbaruiTeksHeader() {
+      const isMasuk = document.getElementById('tab-masuk').classList.contains('active');
+      const isDev = document.getElementById('reg-peran').value === 'PENGEMBANG';
+
+      if (isMasuk) {
+        document.getElementById('judul-auth').textContent = 'Masuk ke Portal';
+        document.getElementById('subjudul-auth').textContent = 'Masuk untuk mengunduh dataset spasial & atribut MBG.';
+      } else {
+        document.getElementById('judul-auth').textContent = isDev ? 'Registrasi Pengembang' : 'Daftar Akun Baru';
+        document.getElementById('subjudul-auth').textContent = isDev
+          ? 'Pendaftaran khusus anggota tim pengembang untuk mengelola zona sekolah PostGIS.'
+          : 'Buat akun pengguna untuk mengunduh dataset spasial & atribut MBG.';
+      }
+    }
+
+    function pilihTab(mode) {
+      const isMasuk = mode === 'masuk';
+      document.getElementById('tab-masuk').classList.toggle('active', isMasuk);
+      document.getElementById('tab-daftar').classList.toggle('active', !isMasuk);
+      document.getElementById('form-masuk').classList.toggle('hidden', !isMasuk);
+      document.getElementById('form-daftar').classList.toggle('hidden', isMasuk);
+      document.getElementById('pesan-auth').classList.add('hidden');
+      perbaruiTeksHeader();
+    }
+
+    // Pemicu tersembunyi: klik 5x pada judul untuk membuka/menutup mode daftar pengembang
+    document.getElementById('judul-auth').addEventListener('click', () => {
+      klikJudulCount++;
+      clearTimeout(klikTimer);
+      klikTimer = setTimeout(() => { klikJudulCount = 0; }, 2000);
+
+      if (klikJudulCount >= 5) {
+        klikJudulCount = 0;
+        const saatIniDev = document.getElementById('reg-peran').value === 'PENGEMBANG';
+        const modeDevBaru = !saatIniDev;
+
+        document.getElementById('reg-peran').value = modeDevBaru ? 'PENGEMBANG' : 'PENGGUNA';
+        document.getElementById('box-kode-pengembang').classList.toggle('hidden', !modeDevBaru);
+        document.getElementById('reg-kode-dev').required = modeDevBaru;
+        if (!modeDevBaru) document.getElementById('reg-kode-dev').value = '';
+
+        document.getElementById('btn-daftar').textContent = modeDevBaru
+          ? 'Buat Akun Pengembang'
+          : 'Buat Akun Pengguna';
+
+        if (modeDevBaru) {
+          pilihTab('daftar');
+        } else {
+          perbaruiTeksHeader();
+        }
+      }
+    });
+
+    function tampilkanPesan(teks, sukses = false) {
+      const box = document.getElementById('pesan-auth');
+      box.textContent = teks;
+      box.classList.remove('hidden', 'sukses');
+      if (sukses) box.classList.add('sukses');
+    }
+
+    function arahkanSetelahMasuk(user) {
+      localStorage.setItem('cicipin_user', JSON.stringify(user));
+      if (redirectPage === 'unduh') {
+        window.location.href = '/?view=unduh';
+      } else if (user.peran === 'PENGEMBANG') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    document.getElementById('form-masuk').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true;
+      btn.textContent = 'Memverifikasi...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('login-email').value.trim(),
+            password: document.getElementById('login-sandi').value
+          })
+        });
+        const hasil = await res.json();
+        if (!res.ok) {
+          tampilkanPesan(hasil.message || 'Email atau kata sandi tidak sesuai.');
+          btn.disabled = false;
+          btn.textContent = 'Masuk Sekarang';
+          return;
+        }
+        arahkanSetelahMasuk(hasil.user);
+      } catch (err) {
+        tampilkanPesan('Gangguan koneksi ke server.');
+        btn.disabled = false;
+        btn.textContent = 'Masuk Sekarang';
+      }
+    });
+
+    document.getElementById('form-daftar').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-daftar');
+      const peranDipilih = document.getElementById('reg-peran').value;
+      btn.disabled = true;
+      btn.textContent = 'Mendaftarkan Akun...';
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nama_lengkap: document.getElementById('reg-nama').value.trim(),
+            instansi: document.getElementById('reg-instansi').value.trim(),
+            email: document.getElementById('reg-email').value.trim(),
+            password: document.getElementById('reg-sandi').value,
+            peran: peranDipilih,
+            kode_pengembang: document.getElementById('reg-kode-dev').value.trim()
+          })
+        });
+        const hasil = await res.json();
+        if (!res.ok) {
+          tampilkanPesan(hasil.message || 'Pendaftaran akun gagal.');
+          btn.disabled = false;
+          btn.textContent = peranDipilih === 'PENGEMBANG' ? 'Buat Akun Pengembang' : 'Buat Akun Pengguna';
+          return;
+        }
+        arahkanSetelahMasuk(hasil.user);
+      } catch (err) {
+        tampilkanPesan('Gangguan koneksi ke server.');
+        btn.disabled = false;
+        btn.textContent = peranDipilih === 'PENGEMBANG' ? 'Buat Akun Pengembang' : 'Buat Akun Pengguna';
+      }
+    });
+  </script>
+</body>
+</html>

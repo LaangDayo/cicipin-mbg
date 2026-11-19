@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mode Kios Kelas SD — Cicipin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red-dark: #7f1d1d;
+      --red-main: #dc2626;
+      --red-accent: #ea580c;
+      --grad-utama: linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #ea580c 100%);
+      --bg-canvas: #f6f7f9;
+      --surface-card: #ffffff;
+      --surface-sub: #f7f8fa;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border-hairline: #ebedf0;
+      --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.045);
+      --shadow-pill: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-top {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-hairline);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      height: 72px;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .brand-logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .nav-pill-hint {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #991b1b;
+    }
+    .btn-pill-secondary {
+      background: #ffffff;
+      color: var(--text-primary);
+      border: 1px solid #e5e7eb;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-pill);
+      transition: all 0.15s;
+    }
+    .btn-pill-secondary:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .btn-pill-primary {
+      background: var(--grad-utama);
+      color: #ffffff;
+      border: none;
+      padding: 11px 22px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(185, 28, 28, 0.24);
+      transition: opacity 0.15s;
+    }
+    .btn-pill-primary:hover { opacity: 0.93; }
+
+    .page-wrapper {
+      max-width: 960px;
+      width: 100%;
+      margin: 28px auto 48px;
+      padding: 0 24px;
+      flex: 1;
+    }
+
+    .hub-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-hairline);
+      border-radius: 18px;
+      padding: 26px 28px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 22px;
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .card-header-row h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .card-header-row small {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-tag {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 640px) { .form-grid-2 { grid-template-columns: 1fr; } }
+
+    .fld-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .fld-control {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 11px;
+      background: var(--surface-sub);
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--text-primary);
+    }
+    .fld-control:focus {
+      outline: none;
+      background: #ffffff;
+      border-color: var(--red-main);
+    }
+
+    .vote-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 18px 0;
+    }
+    @media (max-width: 640px) { .vote-grid { grid-template-columns: 1fr; } }
+
+    .vote-box {
+      background: var(--surface-sub);
+      border: 1.5px solid var(--border-hairline);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+    .vote-box strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .vote-box small {
+      display: block;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .btn-count {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-count:hover {
+      background: var(--grad-utama);
+      color: #ffffff;
+      border-color: transparent;
+    }
+    .count-val {
+      font-size: 24px;
+      font-weight: 800;
+      min-width: 44px;
+      color: var(--text-primary);
+    }
+
+    .hub-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border-hairline);
+      padding: 20px 28px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar-top">
+    <div class="navbar-inner">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/" class="brand-link">
+          <img src="/CICIPIN.png" alt="Logo Cicipin" class="brand-logo-img" />
+        </a>
+        <span class="nav-pill-hint">Mode Kios Kelas SD (Guru Pendamping)</span>
+      </div>
+      <a href="/" class="btn-pill-secondary">&larr; Kembali ke Beranda</a>
+    </div>
+  </header>
+
+  <main class="page-wrapper">
+    <section class="hub-card">
+      <div class="card-header-row">
+        <div>
+          <h1>Rekapitulasi Voting Menu MBG per Kelas SD</h1>
+          <small>Diisi oleh wali kelas bersama siswa SD setelah sesi makan bergizi gratis selesai.</small>
+        </div>
+        <span class="meta-tag" id="badge-kios-status">Siap Mengisi</span>
+      </div>
+
+      <form id="form-kios-sd">
+        <div class="form-grid-2">
+          <div>
+            <label class="fld-label">Satuan Pendidikan (Jenjang SD)</label>
+            <select id="kios-sekolah" class="fld-control" required></select>
+          </div>
+          <div>
+            <label class="fld-label">Rombongan Belajar / Kelas</label>
+            <input type="text" id="kios-kelas" class="fld-control" placeholder="Contoh: Kelas 4A" required />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label class="fld-label">Menu / Lauk Hari Ini</label>
+            <input type="text" id="kios-menu" class="fld-control" placeholder="Contoh: Nasi Putih, Ayam Goreng, Sayur Sop, Jeruk" required />
+          </div>
+          <div>
+            <label class="fld-label">Jam Pengiriman Tiba</label>
+            <input type="time" id="kios-jam" class="fld-control" required />
+          </div>
+        </div>
+
+        <div class="vote-grid">
+          <div class="vote-box">
+            <strong>Suka / Habis</strong>
+            <small>Siswa menyukai rasa &amp; porsi pas</small>
+            <div class="counter-controls">
+              <button type="button" class="btn-count" onclick="ubahHitungan('suka', -1)">&minus;</button>
+              <span class="count-val" id="val-suka">0</span>
+              <button type="button" class="btn-count" onclick="ubahHitungan('suka', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="vote-box">
+            <strong>Cukup / Biasa</strong>
+            <small>Makanan dapat diterima siswa</small>
+            <div class="counter-controls">
+              <button type="button" class="btn-count" onclick="ubahHitungan('cukup', -1)">&minus;</button>
+              <span class="count-val" id="val-cukup">0</span>
+              <button type="button" class="btn-count" onclick="ubahHitungan('cukup', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="vote-box">
+            <strong>Kurang Suka / Sisa</strong>
+            <small>Menu kurang cocok atau porsi berlebih</small>
+            <div class="counter-controls">
+              <button type="button" class="btn-count" onclick="ubahHitungan('kurang', -1)">&minus;</button>
+              <span class="count-val" id="val-kurang">0</span>
+              <button type="button" class="btn-count" onclick="ubahHitungan('kurang', 1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label class="fld-label">Catatan Wali Kelas (Opsional)</label>
+          <input type="text" id="kios-catatan" class="fld-control" placeholder="Catatan tambahan mengenai suhu, kemasan, atau ketepatan waktu..." />
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <strong style="font-size:13.5px; color:#991b1b;">Total Partisipasi Siswa: <span id="total-siswa-kios">0</span> Siswa</strong>
+          <button type="submit" id="btn-submit-kios" class="btn-pill-primary">Simpan Rekap Kelas SD</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="hub-footer">
+    &copy; 2026 Cicipin &mdash; Mode Kios Kelas SD
+  </footer>
+
+  <script>
+    const hitungan = { suka: 0, cukup: 0, kurang: 0 };
+    document.getElementById('kios-jam').value = new Date().toTimeString().slice(0, 5);
+
+    function ubahHitungan(kategori, delta) {
+      hitungan[kategori] = Math.max(0, hitungan[kategori] + delta);
+      document.getElementById(`val-${kategori}`).textContent = hitungan[kategori];
+      document.getElementById('total-siswa-kios').textContent = hitungan.suka + hitungan.cukup + hitungan.kurang;
+    }
+
+    async function muatSekolahSd() {
+      try {
+        const res = await fetch('/api/publik/peta');
+        const data = await res.json();
+        const select = document.getElementById('kios-sekolah');
+        const daftarSd = data.sekolah.filter((s) => s.jenjang === 'SD');
+        const sumber = daftarSd.length ? daftarSd : data.sekolah;
+
+        select.innerHTML = '';
+        sumber.forEach((s) => {
+          const opt = document.createElement('option');
+          opt.value = s.npsn;
+          opt.textContent = `${s.nama_sekolah} (NPSN ${s.npsn})`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        document.getElementById('badge-kios-status').textContent = 'Offline';
+      }
+    }
+
+    document.getElementById('form-kios-sd').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const total = hitungan.suka + hitungan.cukup + hitungan.kurang;
+      if (total === 0) {
+        alert('Isi minimal 1 suara siswa terlebih dahulu.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-kios');
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan Rekap...';
+
+      try {
+        const res = await fetch('/api/kios/lapor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            npsn: document.getElementById('kios-sekolah').value,
+            nama_kelas: document.getElementById('kios-kelas').value.trim(),
+            menu_diterima: document.getElementById('kios-menu').value.trim(),
+            jam_tiba: document.getElementById('kios-jam').value,
+            jumlah_suka: hitungan.suka,
+            jumlah_cukup: hitungan.cukup,
+            jumlah_kurang: hitungan.kurang,
+            catatan_guru: document.getElementById('kios-catatan').value.trim()
+          })
+        });
+        const hasil = await res.json();
+        if (!res.ok) {
+          alert(hasil.message || 'Gagal menyimpan rekap kelas.');
+        } else {
+          alert('Rekap voting kelas SD berhasil disimpan ke basis data!');
+          hitungan.suka = 0;
+          hitungan.cukup = 0;
+          hitungan.kurang = 0;
+          ['suka', 'cukup', 'kurang'].forEach((k) => document.getElementById(`val-${k}`).textContent = '0');
+          document.getElementById('total-siswa-kios').textContent = '0';
+          document.getElementById('kios-catatan').value = '';
+        }
+      } catch (err) {
+        alert('Gangguan koneksi ke server.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Simpan Rekap Kelas SD';
+      }
+    });
+
+    muatSekolahSd();
+  </script>
+</body>
+</html>

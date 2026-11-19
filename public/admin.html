@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dasbor Pengembang — Cicipin</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red-dark: #7f1d1d;
+      --red-main: #dc2626;
+      --red-accent: #ea580c;
+      --grad-utama: linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #ea580c 100%);
+      --bg-canvas: #f6f7f9;
+      --surface-card: #ffffff;
+      --surface-sub: #f7f8fa;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border-hairline: #ebedf0;
+      --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.045);
+      --shadow-pill: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-top {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-hairline);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar-inner {
+      max-width: 1260px;
+      margin: 0 auto;
+      height: 72px;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .brand-logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .nav-pill-hint {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #991b1b;
+    }
+    .btn-pill-secondary {
+      background: #ffffff;
+      color: var(--text-primary);
+      border: 1px solid #e5e7eb;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-pill);
+      transition: all 0.15s;
+    }
+    .btn-pill-secondary:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .btn-pill-primary {
+      background: var(--grad-utama);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      box-shadow: 0 4px 12px rgba(185, 28, 28, 0.24);
+    }
+
+    .page-wrapper {
+      max-width: 1260px;
+      width: 100%;
+      margin: 26px auto 48px;
+      padding: 0 28px;
+      flex: 1;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 960px) { .admin-grid { grid-template-columns: 1fr; } }
+
+    .hub-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-hairline);
+      border-radius: 18px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 22px;
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .card-header-row h2 {
+      margin: 0 0 3px;
+      font-size: 16.5px;
+      font-weight: 800;
+    }
+    .card-header-row small {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .meta-tag {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .fld-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+    .fld-control {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 11px;
+      background: var(--surface-sub);
+      font-family: inherit;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    .fld-control:focus {
+      outline: none;
+      background: #ffffff;
+      border-color: var(--red-main);
+    }
+
+    #map-admin-sekolah {
+      height: 410px;
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .school-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .school-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--surface-sub);
+      border-bottom: 1px solid var(--border-hairline);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .school-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+    .btn-hapus-mini {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-hapus-mini:hover {
+      background: #dc2626;
+      color: #ffffff;
+    }
+
+    .hub-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border-hairline);
+      padding: 20px 28px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar-top">
+    <div class="navbar-inner">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <a href="/" class="brand-link">
+          <img src="/CICIPIN.png" alt="Logo Cicipin" class="brand-logo-img" />
+        </a>
+        <span class="nav-pill-hint">Dasbor Pengembang &amp; Manajemen Poligon PostGIS</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <a href="/" class="btn-pill-secondary">&larr; Portal Utama</a>
+        <button type="button" class="btn-pill-secondary" onclick="keluarAdmin()">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-wrapper">
+    <div class="admin-grid">
+      <!-- FORM TAMBAH POLIGON SEKOLAH -->
+      <section class="hub-card">
+        <div class="card-header-row">
+          <div>
+            <h2>Tambah / Perbarui Zona Satuan Pendidikan</h2>
+            <small>Unggah atau tempel objek GeoJSON Polygon (EPSG:4326) hasil digitasi QGIS.</small>
+          </div>
+          <span class="meta-tag">PostGIS SRID 4326</span>
+        </div>
+
+        <form id="form-tambah-sekolah">
+          <label class="fld-label">NPSN Satuan Pendidikan</label>
+          <input type="text" id="adm-npsn" class="fld-control" placeholder="Contoh: 20219101" required />
+
+          <label class="fld-label">Nama Sekolah</label>
+          <input type="text" id="adm-nama" class="fld-control" placeholder="Contoh: SMAN 10 Bandung" required />
+
+          <label class="fld-label">Jenjang Pendidikan</label>
+          <select id="adm-jenjang" class="fld-control" required>
+            <option value="SD">SD</option>
+            <option value="SMP">SMP</option>
+            <option value="SMA">SMA</option>
+            <option value="SMK">SMK</option>
+          </select>
+
+          <label class="fld-label">Impor Berkas .geojson (Opsional)</label>
+          <input type="file" id="adm-file-geojson" accept=".geojson,.json" class="fld-control" style="padding:8px 10px;" />
+
+          <label class="fld-label">Geometri GeoJSON Polygon (EPSG:4326)</label>
+          <textarea id="adm-geojson" rows="6" class="fld-control" style="font-family:monospace; font-size:12px;" placeholder='{"type":"Polygon","coordinates":[[[107.634,-6.898],[107.636,-6.898],[107.636,-6.900],[107.634,-6.900],[107.634,-6.898]]]}' required></textarea>
+
+          <button type="submit" class="btn-pill-primary" style="width:100%;">Simpan Poligon ke PostGIS</button>
+        </form>
+      </section>
+
+      <!-- PETA & DAFTAR POLIGON AKTIF -->
+      <div>
+        <section class="hub-card">
+          <div class="card-header-row">
+            <div>
+              <h2>Pratinjau Geometri Poligon &amp; Titik Sekolah</h2>
+              <small>Verifikasi spasial batas geofencing satuan pendidikan terdaftar</small>
+            </div>
+            <span class="meta-tag" id="adm-jumlah-sekolah">0 Sekolah</span>
+          </div>
+          <div id="map-admin-sekolah"></div>
+        </section>
+
+        <section class="hub-card">
+          <div class="card-header-row">
+            <div>
+              <h2>Daftar Satuan Pendidikan Terdaftar</h2>
+              <small>Kelola zona geofencing aktif di basis data</small>
+            </div>
+          </div>
+          <table class="school-table">
+            <thead>
+              <tr>
+                <th>NPSN</th>
+                <th>Nama Sekolah</th>
+                <th>Jenjang</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-sekolah-admin"></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="hub-footer">
+    &copy; 2026 Cicipin &mdash; Dasbor Pengembang Sistem Spasial
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+  <script>
+    const userAktif = JSON.parse(localStorage.getItem('cicipin_user') || 'null');
+    if (!userAktif || userAktif.peran !== 'PENGEMBANG') {
+      window.location.href = '/masuk';
+    }
+
+    function keluarAdmin() {
+      localStorage.removeItem('cicipin_user');
+      window.location.href = '/';
+    }
+
+    const mapAdmin = L.map('map-admin-sekolah').setView([-6.8988, 107.6355], 15);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri World Street Map'
+    }).addTo(mapAdmin);
+    const layerAdmin = L.layerGroup().addTo(mapAdmin);
+
+    document.getElementById('adm-file-geojson').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          const geom = parsed.type === 'FeatureCollection'
+            ? parsed.features[0].geometry
+            : (parsed.type === 'Feature' ? parsed.geometry : parsed);
+          document.getElementById('adm-geojson').value = JSON.stringify(geom);
+        } catch (err) {
+          alert('Format berkas GeoJSON tidak valid.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    async function muatDataAdmin() {
+      const res = await fetch('/api/publik/peta');
+      const data = await res.json();
+      const daftar = data.sekolah || [];
+
+      document.getElementById('adm-jumlah-sekolah').textContent = `${daftar.length} Sekolah`;
+      layerAdmin.clearLayers();
+      const tbody = document.getElementById('tbody-sekolah-admin');
+      tbody.innerHTML = '';
+      const bounds = L.latLngBounds();
+
+      daftar.forEach((s) => {
+        // Warna poligon & titik tetap biru seperti semula
+        const poly = L.geoJSON(s.geometry, {
+          style: { color: '#0284c7', weight: 2, fillColor: '#0284c7', fillOpacity: 0.16 }
+        }).addTo(layerAdmin);
+        bounds.extend(poly.getBounds());
+
+        const pusat = turf.centroid(s.geometry).geometry.coordinates;
+        L.circleMarker([pusat[1], pusat[0]], {
+          radius: 8,
+          color: '#ffffff',
+          weight: 2,
+          fillColor: '#0284c7',
+          fillOpacity: 1
+        }).addTo(layerAdmin).bindPopup(`<strong>${s.nama_sekolah}</strong> (${s.jenjang})`);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${s.npsn}</strong></td>
+          <td>${s.nama_sekolah}</td>
+          <td>${s.jenjang}</td>
+          <td><button type="button" class="btn-hapus-mini" onclick="hapusSekolah('${s.npsn}')">Hapus</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (bounds.isValid()) mapAdmin.fitBounds(bounds, { padding: [40, 40] });
+    }
+
+    document.getElementById('form-tambah-sekolah').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let geomObj;
+      try {
+        geomObj = JSON.parse(document.getElementById('adm-geojson').value);
+      } catch (err) {
+        alert('JSON geometri tidak valid.');
+        return;
+      }
+
+      const res = await fetch('/api/admin/sekolah', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          npsn: document.getElementById('adm-npsn').value.trim(),
+          nama_sekolah: document.getElementById('adm-nama').value.trim(),
+          jenjang: document.getElementById('adm-jenjang').value,
+          geometry: geomObj
+        })
+      });
+      const hasil = await res.json();
+      if (!res.ok) {
+        alert(hasil.message || 'Gagal menyimpan poligon.');
+        return;
+      }
+      alert('Poligon satuan pendidikan berhasil disimpan!');
+      document.getElementById('form-tambah-sekolah').reset();
+      muatDataAdmin();
+    });
+
+    async function hapusSekolah(npsn) {
+      if (!confirm(`Hapus poligon satuan pendidikan dengan NPSN ${npsn}?`)) return;
+      const res = await fetch(`/api/admin/sekolah/${encodeURIComponent(npsn)}`, { method: 'DELETE' });
+      if (res.ok) muatDataAdmin();
+    }
+
+    muatDataAdmin();
+  </script>
+</body>
+</html>

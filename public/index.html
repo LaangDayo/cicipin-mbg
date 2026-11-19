@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cicipin — Umpan Balik Makan Bergizi Gratis Berbasis Lokasi</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red-dark: #7f1d1d;
+      --red-main: #dc2626;
+      --red-accent: #ea580c;
+      --grad-utama: linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #ea580c 100%);
+      --bg-canvas: #f6f7f9;
+      --surface-card: #ffffff;
+      --surface-sub: #f7f8fa;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border-hairline: #ebedf0;
+      --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.045);
+      --shadow-pill: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-top {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-hairline);
+      position: sticky;
+      top: 0;
+      z-index: 1100;
+    }
+    .navbar-inner {
+      max-width: 1260px;
+      margin: 0 auto;
+      height: 72px;
+      padding: 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .nav-left-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn-hamburger {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: var(--text-primary);
+      font-size: 17px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-pill);
+      transition: all 0.15s;
+    }
+    .btn-hamburger:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: var(--red-main);
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .brand-logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .nav-pill-hint {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #991b1b;
+    }
+    @media (max-width: 860px) {
+      .nav-pill-hint { display: none; }
+      .navbar-inner { padding: 0 16px; }
+    }
+
+    .nav-right-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-pill-secondary {
+      background: #ffffff;
+      color: var(--text-primary);
+      border: 1px solid #e5e7eb;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-pill);
+      transition: all 0.15s;
+    }
+    .btn-pill-secondary:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .btn-pill-primary {
+      background: var(--grad-utama);
+      color: #ffffff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 4px 12px rgba(185, 28, 28, 0.24);
+      transition: opacity 0.15s;
+    }
+    .btn-pill-primary:hover { opacity: 0.93; }
+
+    .page-wrapper {
+      max-width: 1260px;
+      width: 100%;
+      margin: 26px auto 48px;
+      padding: 0 28px;
+      flex: 1;
+    }
+    @media (max-width: 760px) {
+      .page-wrapper { padding: 0 16px; margin-top: 20px; }
+    }
+
+    .breadcrumb-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .breadcrumb-bar a {
+      color: var(--red-main);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: 1.32fr 1fr;
+      gap: 26px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .hub-grid { grid-template-columns: 1fr; }
+    }
+
+    .hero-block { margin-bottom: 20px; }
+    .hero-block h1 {
+      margin: 0 0 12px;
+      font-size: 32px;
+      line-height: 1.22;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+    }
+    @media (max-width: 640px) { .hero-block h1 { font-size: 25px; } }
+    .hero-block p {
+      margin: 0 0 18px;
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 620px;
+    }
+
+    .pillar-cards-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 640px) { .pillar-cards-row { grid-template-columns: 1fr; } }
+    .pillar-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-hairline);
+      border-radius: 14px;
+      padding: 14px 15px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+    }
+    .pillar-ico {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #fee2e2, #ffedd5);
+      color: var(--red-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .pillar-card strong {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .pillar-card span {
+      display: block;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-muted);
+    }
+
+    .hub-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-hairline);
+      border-radius: 18px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 22px;
+    }
+    .hub-card:last-child { margin-bottom: 0; }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .card-header-row h2, .card-header-row h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .card-header-row small {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .meta-tag {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 580px) { .form-grid-2 { grid-template-columns: 1fr; } }
+
+    .fld-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+    .fld-control {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 11px;
+      background: var(--surface-sub);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-primary);
+      transition: all 0.15s;
+    }
+    .fld-control:focus {
+      outline: none;
+      background: #ffffff;
+      border-color: var(--red-main);
+    }
+
+    .aspects-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 580px) { .aspects-grid { grid-template-columns: 1fr; } }
+
+    .aspect-subcard {
+      background: var(--surface-sub);
+      border: 1px solid var(--border-hairline);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .aspect-subcard span {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 7px;
+    }
+    .rating-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+    .rate-item {
+      padding: 6px 2px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      text-align: center;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: all 0.15s;
+    }
+    .rate-item.selected {
+      background: var(--grad-utama);
+      border-color: transparent;
+      color: #ffffff;
+    }
+
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .chip-lbl input { display: none; }
+    .chip-lbl span {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid #e5e7eb;
+      background: var(--surface-sub);
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .chip-lbl input:checked + span {
+      background: #fee2e2;
+      border-color: #dc2626;
+      color: #991b1b;
+    }
+
+    .form-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .preview-map-box {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+    #map-preview-beranda {
+      position: relative;
+      z-index: 1;
+      height: 255px;
+      width: 100%;
+      cursor: default;
+    }
+    .map-legend-line {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .leg-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .leg-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .stacked-subcards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .subcard-item {
+      background: var(--surface-sub);
+      border: 1px solid var(--border-hairline);
+      border-radius: 12px;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .subcard-item strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .subcard-item small {
+      display: block;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Katalog Unduh Data */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    @media (max-width: 920px) { .catalog-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .catalog-grid { grid-template-columns: 1fr; } }
+
+    .catalog-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-hairline);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+    .catalog-thumb {
+      height: 135px;
+      background: linear-gradient(135deg, #fef2f2 0%, #ffedd5 100%);
+      border-bottom: 1px solid var(--border-hairline);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .catalog-badge {
+      align-self: flex-start;
+      background: #ffffff;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .catalog-body {
+      padding: 16px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .catalog-body h3 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .catalog-body p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Drawer Menu Navigasi Kiri */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 1200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .left-dashboard-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 310px;
+      max-width: 86vw;
+      background: #ffffff;
+      z-index: 1300;
+      box-shadow: 10px 0 30px rgba(15, 23, 42, 0.16);
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .left-dashboard-menu.open { transform: translateX(0); }
+
+    .drawer-header {
+      background: var(--grad-utama);
+      color: #ffffff;
+      padding: 20px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-header h3 { margin: 0; font-size: 16px; font-weight: 800; }
+    .drawer-header small { display: block; font-size: 11.5px; color: #fee2e2; margin-top: 2px; }
+    .btn-close-drawer {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 14px; }
+    .drawer-section-lbl {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 6px 8px 10px;
+    }
+    .menu-feature-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 13px;
+      margin-bottom: 7px;
+      border-radius: 12px;
+      border: 1.5px solid transparent;
+      background: #f8fafc;
+      color: var(--text-primary);
+      text-decoration: none;
+      text-align: left;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+    .menu-feature-item:hover { background: #fef2f2; border-color: #fecaca; }
+    .menu-feature-item.active {
+      background: linear-gradient(135deg, #fef2f2, #ffedd5);
+      border-color: #dc2626;
+    }
+    .feat-ico {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+    .menu-feature-item.active .feat-ico {
+      background: var(--grad-utama);
+      color: #ffffff;
+      border: none;
+    }
+    .feat-text strong { display: block; font-size: 13px; font-weight: 700; }
+    .feat-text span { display: block; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .hub-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border-hairline);
+      padding: 36px 28px 24px;
+      margin-top: auto;
+    }
+    .footer-inner { max-width: 1260px; margin: 0 auto; }
+    .footer-cols {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+    @media (max-width: 820px) { .footer-cols { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 520px) { .footer-cols { grid-template-columns: 1fr; } }
+    .footer-cols h4 { margin: 0 0 10px; font-size: 13px; font-weight: 800; color: var(--text-primary); }
+    .footer-cols p, .footer-cols a {
+      display: block; font-size: 12.5px; color: var(--text-muted);
+      text-decoration: none; margin-bottom: 7px; line-height: 1.5;
+    }
+    .footer-cols a:hover { color: var(--red-main); }
+    .footer-bottom { padding-top: 16px; text-align: center; font-size: 11.5px; color: var(--text-muted); }
+
+    .hidden { display: none !important; }
+
+    /* Bingkai & Kontrol Peta WebGIS */
+    .gis-frame {
+      position: relative;
+      border: 1px solid #d1d5db;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: var(--shadow-card);
+    }
+    .gis-bar {
+      background: var(--grad-utama);
+      color: #ffffff;
+      padding: 13px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .gis-bar select {
+      width: auto;
+      padding: 6px 12px;
+      font-size: 12.5px;
+      background: #ffffff;
+      border: none;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .map-canvas {
+      position: relative;
+      z-index: 1;
+      height: 530px;
+      width: 100%;
+    }
+    .legend-card {
+      position: absolute;
+      bottom: 46px;
+      right: 16px;
+      z-index: 900;
+      background: rgba(255, 255, 255, 0.96);
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+      font-size: 12px;
+      min-width: 215px;
+    }
+    .legend-card h4 { margin: 0 0 8px; font-size: 12.5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+    .leg-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11.5px; }
+    .leg-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); }
+    .leg-circle { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #64748b; }
+    .coord-footer {
+      background: #f8fafc;
+      border-top: 1px solid #cbd5e1;
+      padding: 8px 16px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .label-tematik {
+      background: rgba(6, 78, 59, 0.92);
+      color: #ffffff;
+      border: 1px solid #ffffff;
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Drawer Menu Navigasi Kiri -->
+  <div id="drawer-backdrop" class="drawer-backdrop" onclick="tutupMenuKiri()"></div>
+
+  <aside id="left-dashboard-menu" class="left-dashboard-menu" aria-label="Menu Navigasi Utama">
+    <div class="drawer-header">
+      <div>
+        <h3>Navigasi Cicipin</h3>
+        <small id="lbl-posisi-halaman">Aktif: Beranda</small>
+      </div>
+      <button type="button" class="btn-close-drawer" onclick="tutupMenuKiri()">&times;</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-section-lbl">Fitur Utama Portal</div>
+
+      <button type="button" id="menu-item-beranda" class="menu-feature-item active" onclick="bukaTampilan('beranda')">
+        <span class="feat-ico">&#127968;</span>
+        <span class="feat-text">
+          <strong>Beranda</strong>
+          <span>Formulir berbasis lokasi &amp; pratinjau</span>
+        </span>
+      </button>
+
+      <button type="button" id="menu-item-sebaran" class="menu-feature-item" onclick="bukaTampilan('sebaran')">
+        <span class="feat-ico">&#128205;</span>
+        <span class="feat-text">
+          <strong>Peta Sebaran Titik</strong>
+          <span>Visualisasi zona &amp; distribusi sekolah</span>
+        </span>
+      </button>
+
+      <button type="button" id="menu-item-tematik" class="menu-feature-item" onclick="bukaTampilan('tematik')">
+        <span class="feat-ico">&#128506;</span>
+        <span class="feat-text">
+          <strong>Peta Tematik Atribut</strong>
+          <span>Klasifikasi mutu &amp; keluhan berjenjang</span>
+        </span>
+      </button>
+
+      <button type="button" id="menu-item-unduh" class="menu-feature-item" onclick="bukaTampilan('unduh')">
+        <span class="feat-ico">&#11015;</span>
+        <span class="feat-text">
+          <strong>Unduh Data</strong>
+          <span>Katalog dataset CSV &amp; GeoJSON</span>
+        </span>
+      </button>
+
+      <div class="drawer-section-lbl" style="margin-top: 16px;">Fitur Tambahan Opsional</div>
+      <a href="/kios" class="menu-feature-item">
+        <span class="feat-ico">&#127979;</span>
+        <span class="feat-text">
+          <strong>Mode Kios Kelas SD</strong>
+          <span>Voting kelas oleh guru pendamping SD</span>
+        </span>
+      </a>
+
+      <div id="blok-menu-peran" class="hidden">
+        <div class="drawer-section-lbl" style="margin-top: 16px;">Dasbor Terautentikasi</div>
+        <div id="wadah-menu-peran"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Bilah Navigasi Atas -->
+  <header class="navbar-top">
+    <div class="navbar-inner">
+      <div class="nav-left-group">
+        <button type="button" class="btn-hamburger" onclick="bukaMenuKiri()" title="Buka Menu Fitur">&#9776;</button>
+        <a href="/" class="brand-link" onclick="bukaTampilan('beranda'); return false;">
+          <img src="/CICIPIN.png" alt="Logo Cicipin" class="brand-logo-img" />
+        </a>
+        <span class="nav-pill-hint">Umpan Balik Makan Bergizi Gratis Berbasis Lokasi</span>
+      </div>
+
+      <div class="nav-right-group" id="nav-auth-area">
+        <a href="/masuk" class="btn-pill-primary">Masuk / Daftar</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Konten Utama -->
+  <main class="page-wrapper">
+    <!-- TAMPILAN 1: BERANDA -->
+    <div id="view-beranda" class="hub-grid">
+      <!-- KOLOM KIRI -->
+      <div>
+        <section class="hero-block">
+          <h1>Bagikan pengalamanmu tentang program MBG — secara anonim dan aman</h1>
+          <p>
+            Cicipin mengumpulkan umpan balik siswa berbasis lokasi sekolah untuk membantu meningkatkan mutu makanan, ketepatan pengiriman, serta transparansi pelaksanaan program.
+          </p>
+        </section>
+
+        <div class="pillar-cards-row">
+          <div class="pillar-card">
+            <div class="pillar-ico">&#128274;</div>
+            <div>
+              <strong>Anonim &amp; Aman</strong>
+              <span>Identitas siswa terlindungi saat mengirim penilaian</span>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-ico">&#128205;</div>
+            <div>
+              <strong>Berbasis Lokasi</strong>
+              <span>Tervalidasi pada titik satuan pendidikan aktif</span>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-ico">&#9889;</div>
+            <div>
+              <strong>Cepat &amp; Ringkas</strong>
+              <span>Dirancang untuk pengisian langsung setelah makan</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="hub-card">
+          <div class="card-header-row">
+            <div>
+              <h2>Formulir Penilaian Menu MBG</h2>
+              <small>Pilih sekolah tujuan, isi lauk dan waktu kedatangan, beri nilai 4 aspek mutu, dan lampirkan foto bukti.</small>
+            </div>
+            <span class="meta-tag" id="badge-status-geo">Memvalidasi...</span>
+          </div>
+
+          <form id="form-lapor-mbg">
+            <div class="form-grid-2">
+              <div>
+                <label class="fld-label">Sekolah / Lokasi Kejadian</label>
+                <select id="select-lokasi-sekolah" class="fld-control" onchange="gantiSekolahManual()" required></select>
+              </div>
+              <div>
+                <label class="fld-label">Koordinat Lokasi Perangkat</label>
+                <input type="text" id="status-gps-input" class="fld-control" value="Mendeteksi lokasi..." readonly style="font-weight:600; color:#b91c1c;" />
+              </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label class="fld-label">Lauk / Menu MBG Hari Ini</label>
+              <input type="text" id="in-menu-lauk" class="fld-control" placeholder="Contoh: Nasi Putih, Ayam Kecap, Tumis Buncis, Pisang, Susu UHT" required />
+            </div>
+
+            <div class="form-grid-2">
+              <div>
+                <label class="fld-label">Tanggal Pengiriman</label>
+                <input type="date" id="in-tanggal-tiba" class="fld-control" required />
+              </div>
+              <div>
+                <label class="fld-label">Jam Pengiriman Tiba</label>
+                <input type="time" id="in-jam-tiba" class="fld-control" required />
+              </div>
+            </div>
+
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+              <strong>Keterangan Skala (1–5):</strong> 1 = Sangat Buruk &bull; 2 = Buruk &bull; 3 = Cukup &bull; 4 = Baik &bull; 5 = Sangat Baik
+            </div>
+
+            <div class="aspects-grid">
+              <div class="aspect-subcard">
+                <span>1. Penilaian Rasa (1–5)</span>
+                <input type="hidden" id="in-rasa" value="5" />
+                <div class="rating-row" data-target="in-rasa">
+                  <button type="button" class="rate-item" data-val="1">1</button>
+                  <button type="button" class="rate-item" data-val="2">2</button>
+                  <button type="button" class="rate-item" data-val="3">3</button>
+                  <button type="button" class="rate-item" data-val="4">4</button>
+                  <button type="button" class="rate-item selected" data-val="5">5</button>
+                </div>
+              </div>
+
+              <div class="aspect-subcard">
+                <span>2. Kesegaran &amp; Suhu (1–5)</span>
+                <input type="hidden" id="in-segar" value="5" />
+                <div class="rating-row" data-target="in-segar">
+                  <button type="button" class="rate-item" data-val="1">1</button>
+                  <button type="button" class="rate-item" data-val="2">2</button>
+                  <button type="button" class="rate-item" data-val="3">3</button>
+                  <button type="button" class="rate-item" data-val="4">4</button>
+                  <button type="button" class="rate-item selected" data-val="5">5</button>
+                </div>
+              </div>
+
+              <div class="aspect-subcard">
+                <span>3. Kecukupan Porsi (1–5)</span>
+                <input type="hidden" id="in-porsi" value="5" />
+                <div class="rating-row" data-target="in-porsi">
+                  <button type="button" class="rate-item" data-val="1">1</button>
+                  <button type="button" class="rate-item" data-val="2">2</button>
+                  <button type="button" class="rate-item" data-val="3">3</button>
+                  <button type="button" class="rate-item" data-val="4">4</button>
+                  <button type="button" class="rate-item selected" data-val="5">5</button>
+                </div>
+              </div>
+
+              <div class="aspect-subcard">
+                <span>4. Ketepatan Waktu (1–5)</span>
+                <input type="hidden" id="in-waktu" value="5" />
+                <div class="rating-row" data-target="in-waktu">
+                  <button type="button" class="rate-item" data-val="1">1</button>
+                  <button type="button" class="rate-item" data-val="2">2</button>
+                  <button type="button" class="rate-item" data-val="3">3</button>
+                  <button type="button" class="rate-item" data-val="4">4</button>
+                  <button type="button" class="rate-item selected" data-val="5">5</button>
+                </div>
+              </div>
+            </div>
+
+            <label class="fld-label">5. Kategori Keluhan (Opsional)</label>
+            <div class="chip-wrap">
+              <label class="chip-lbl"><input type="checkbox" name="keluhan" value="PORSI_KURANG" /><span>Porsi Kurang</span></label>
+              <label class="chip-lbl"><input type="checkbox" name="keluhan" value="MAKANAN_BASI" /><span>Makanan Basi</span></label>
+              <label class="chip-lbl"><input type="checkbox" name="keluhan" value="TERLAMBAT" /><span>Datang Terlambat</span></label>
+              <label class="chip-lbl"><input type="checkbox" name="keluhan" value="KEMASAN_RUSAK" /><span>Kemasan Rusak</span></label>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom:0;">
+              <div>
+                <label class="fld-label">6. Catatan Lapangan</label>
+                <input type="text" id="in-deskripsi" class="fld-control" placeholder="Tuliskan kondisi makanan hari ini..." required />
+              </div>
+              <div>
+                <label class="fld-label">7. Foto Bukti Makanan</label>
+                <input type="file" id="in-foto" accept="image/*" capture="environment" class="fld-control" style="padding:8px 10px;" required />
+              </div>
+            </div>
+
+            <div class="form-actions-bar">
+              <button type="submit" id="btn-kirim-lapor" class="btn-pill-primary" style="padding:11px 22px; font-size:13.5px;">
+                Kirim Umpan Balik
+              </button>
+              <button type="button" class="btn-pill-secondary" onclick="gunakanGpsAsli()">
+                Perbarui GPS Perangkat
+              </button>
+              <a href="/kios" class="btn-pill-secondary" title="Fitur tambahan khusus guru SD di perangkat kelas">
+                Mode Kios SD (Guru)
+              </a>
+            </div>
+          </form>
+
+          <div id="box-sudah-lapor" class="hidden" style="text-align:center; padding:26px 16px; background:#fef2f2; border-radius:14px; border:1px solid #fecaca;">
+            <strong style="color:#991b1b; font-size:16px;">Umpan Balik Berhasil Tercatat!</strong>
+            <p style="font-size:13px; color:#4b5563; margin:6px 0 14px;">
+              Terima kasih telah berpartisipasi dalam pemantauan program MBG.
+            </p>
+            <button type="button" onclick="resetSesiUji()" class="btn-pill-secondary">
+              Isi Laporan Baru
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- KOLOM KANAN -->
+      <div>
+        <section class="hub-card">
+          <div class="card-header-row">
+            <div>
+              <h3>Sekolah Terdekat dari Posisi GPS</h3>
+              <small id="subjudul-peta-terdekat">Menampilkan 1 satuan pendidikan terdekat dari koordinat perangkat Anda</small>
+            </div>
+            <span class="meta-tag" id="jml-sekolah-tag">1 Terdekat</span>
+          </div>
+
+          <div class="preview-map-box">
+            <div id="map-preview-beranda"></div>
+          </div>
+
+          <div class="map-legend-line">
+            <div class="leg-group">
+              <span><i class="leg-dot" style="background:#0284c7;"></i>Sekolah Terdekat</span>
+              <span><i class="leg-dot" style="background:#dc2626;"></i>Posisi GPS Pengirim</span>
+            </div>
+            <button type="button" class="btn-pill-secondary" style="padding:5px 12px; font-size:11.5px;" onclick="bukaTampilan('sebaran')">
+              Lihat Semua Sekolah &rarr;
+            </button>
+          </div>
+        </section>
+
+        <section class="hub-card">
+          <div class="card-header-row">
+            <div>
+              <h3>Daftar Satuan Pendidikan Aktif</h3>
+              <small>Cakupan sekolah yang terhubung pada sistem Cicipin</small>
+            </div>
+          </div>
+
+          <div class="stacked-subcards" id="ringkasan-sekolah-beranda"></div>
+        </section>
+
+        <section class="hub-card">
+          <div class="card-header-row">
+            <div>
+              <h3>Katalog Unduh Data &amp; Spasial</h3>
+              <small>Jelajahi katalog dataset umpan balik MBG dalam format CSV dan GeoJSON. Masuk akun diperlukan saat melakukan pengunduhan berkas.</small>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+            <button type="button" class="btn-pill-primary" onclick="bukaTampilan('unduh')">Buka Katalog Unduh Data</button>
+            <button type="button" class="btn-pill-secondary" onclick="bukaTampilan('tematik')">Peta Tematik Atribut</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAMPILAN 2: PETA SEBARAN TITIK -->
+    <div id="view-sebaran" class="hidden">
+      <div class="breadcrumb-bar">
+        <a href="/" onclick="bukaTampilan('beranda'); return false;">Beranda</a>
+        <span>/</span>
+        <strong>Peta Sebaran Titik</strong>
+      </div>
+
+      <div class="gis-frame">
+        <div class="gis-bar">
+          <strong>PETA SEBARAN LOKASI SEKOLAH &amp; VOLUME LAPORAN</strong>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <select id="basemap-sebaran" onchange="gantiBasemap('sebaran', this.value)">
+              <option value="STREET">Peta Dasar: Jalan &amp; Wilayah</option>
+              <option value="SATELIT">Peta Dasar: Citra Satelit</option>
+              <option value="TOPO">Peta Dasar: Topografi</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="map-sebaran" class="map-canvas"></div>
+
+        <div class="legend-card">
+          <h4>Legenda Sebaran</h4>
+          <div class="leg-row"><span class="leg-circle" style="background:#15803d;"></span>Kategori Baik</div>
+          <div class="leg-row"><span class="leg-circle" style="background:#f59e0b;"></span>Kategori Perlu Perhatian</div>
+          <div class="leg-row"><span class="leg-circle" style="background:#dc2626;"></span>Kategori Keluhan Tinggi</div>
+          <div class="leg-row"><span class="leg-box" style="background:rgba(2,132,199,0.2); border-color:#0284c7;"></span>Poligon Zona Sekolah</div>
+        </div>
+
+        <div class="coord-footer">
+          <span id="coord-sebaran">Koordinat Kursor: -6.89880, 107.63550 | EPSG:4326</span>
+          <span>Detail rincian laporan tersedia pada menu <a href="/?view=unduh" onclick="bukaTampilan('unduh'); return false;" style="color:#dc2626; font-weight:700;">Unduh Data</a></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAMPILAN 3: PETA TEMATIK ATRIBUT -->
+    <div id="view-tematik" class="hidden">
+      <div class="breadcrumb-bar">
+        <a href="/" onclick="bukaTampilan('beranda'); return false;">Beranda</a>
+        <span>/</span>
+        <strong>Peta Tematik Atribut</strong>
+      </div>
+
+      <div class="gis-frame">
+        <div class="gis-bar">
+          <strong>PETA TEMATIK ATRIBUT PENILAIAN SISWA</strong>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <select id="pilih-atribut-tematik" onchange="renderPetaTematik()">
+              <option value="indeks_mutu">Klasifikasi: Indeks Mutu Keseluruhan</option>
+              <option value="rata_rasa">Klasifikasi: Aspek Rasa</option>
+              <option value="rata_segar">Klasifikasi: Aspek Kesegaran</option>
+              <option value="rata_porsi">Klasifikasi: Aspek Kecukupan Porsi</option>
+              <option value="rata_waktu">Klasifikasi: Ketepatan Waktu</option>
+              <option value="persen_keluhan">Klasifikasi: Tingkat Keluhan</option>
+            </select>
+            <select id="basemap-tematik" onchange="gantiBasemap('tematik', this.value)">
+              <option value="STREET">Peta Dasar: Jalan &amp; Wilayah</option>
+              <option value="SATELIT">Peta Dasar: Citra Satelit</option>
+              <option value="TOPO">Peta Dasar: Topografi</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="map-tematik" class="map-canvas"></div>
+
+        <div class="legend-card">
+          <h4>Legenda Kelas Tematik</h4>
+          <div id="isi-legenda-tematik"></div>
+        </div>
+
+        <div class="coord-footer">
+          <span id="coord-tematik">Koordinat Kursor: -6.89880, 107.63550 | EPSG:4326</span>
+          <span>Data atribut rinci tersedia pada katalog <a href="/?view=unduh" onclick="bukaTampilan('unduh'); return false;" style="color:#dc2626; font-weight:700;">Unduh Data</a></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAMPILAN 4: KATALOG UNDUH DATA -->
+    <div id="view-unduh" class="hidden">
+      <div class="breadcrumb-bar">
+        <a href="/" onclick="bukaTampilan('beranda'); return false;">Beranda</a>
+        <span>/</span>
+        <strong>Unduh Data</strong>
+      </div>
+
+      <section class="hub-card" style="margin-bottom:22px;">
+        <div class="card-header-row" style="margin-bottom:0;">
+          <div>
+            <h2>Katalog Unduh Dataset Spasial &amp; Atribut MBG</h2>
+            <small id="subjudul-unduh-status">Pilih paket data satuan pendidikan atau dataset gabungan di bawah ini. Pengunduhan memerlukan akun terdaftar.</small>
+          </div>
+          <span class="meta-tag" id="badge-akses-unduh">Status: Belum Masuk</span>
+        </div>
+      </section>
+
+      <div class="catalog-grid" id="grid-katalog-unduh"></div>
+    </div>
+  </main>
+
+  <!-- Footer 4 Kolom -->
+  <footer class="hub-footer">
+    <div class="footer-inner">
+      <div class="footer-cols">
+        <div>
+          <div class="brand-link" style="margin-bottom:8px;">
+            <img src="/CICIPIN.png" alt="Logo Cicipin" style="height:44px; width:auto;" />
+          </div>
+          <p>Umpan Balik Makan Bergizi Gratis Berbasis Lokasi untuk peningkatan mutu layanan gizi siswa.</p>
+        </div>
+
+        <div>
+          <h4>Eksplorasi Fitur</h4>
+          <a href="/" onclick="bukaTampilan('beranda'); return false;">Formulir Penilaian</a>
+          <a href="/?view=sebaran" onclick="bukaTampilan('sebaran'); return false;">Peta Sebaran Titik</a>
+          <a href="/?view=tematik" onclick="bukaTampilan('tematik'); return false;">Peta Tematik Atribut</a>
+          <a href="/?view=unduh" onclick="bukaTampilan('unduh'); return false;">Unduh Data</a>
+          <a href="/kios">Mode Kios Kelas SD</a>
+        </div>
+
+        <div>
+          <h4>Akses Pengguna</h4>
+          <a href="/masuk">Masuk / Daftar Akun</a>
+        </div>
+
+        <div>
+          <h4>Sistem Spasial</h4>
+          <p>Referensi Koordinat: EPSG:4326</p>
+          <p>Validasi Geofencing PostGIS</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        &copy; 2026 Cicipin &mdash; Umpan Balik Makan Bergizi Gratis Berbasis Lokasi
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+  <script>
+    const API_URL = '';
+    let cacheSekolah = [];
+    let cacheAgregat = [];
+    let koordinatSiswa = null;
+    let gpsAsliPerangkat = null;
+    let tokenSesi = localStorage.getItem('mbg_db_token') || null;
+
+    const userAktif = JSON.parse(localStorage.getItem('cicipin_user') || 'null');
+
+    const sekarang = new Date();
+    document.getElementById('in-tanggal-tiba').value = sekarang.toISOString().slice(0, 10);
+    document.getElementById('in-jam-tiba').value = sekarang.toTimeString().slice(0, 5);
+
+    function siapkanIdentitasPeran() {
+      const navAuth = document.getElementById('nav-auth-area');
+      const blokPeran = document.getElementById('blok-menu-peran');
+      const wadahPeran = document.getElementById('wadah-menu-peran');
+      const badgeUnduh = document.getElementById('badge-akses-unduh');
+      const subjudulUnduh = document.getElementById('subjudul-unduh-status');
+
+      if (!userAktif) {
+        navAuth.innerHTML = `<a href="/masuk" class="btn-pill-primary">Masuk / Daftar</a>`;
+        blokPeran.classList.add('hidden');
+        badgeUnduh.textContent = 'Status: Belum Masuk';
+        subjudulUnduh.textContent = 'Pilih paket dataset di bawah ini. Saat menekan tombol Unduh Data, Anda akan diarahkan untuk masuk terlebih dahulu lalu kembali ke katalog ini.';
+        return;
+      }
+
+      navAuth.innerHTML = `
+        <span style="font-size:12.5px; font-weight:700; color:#111827;">Hi, ${userAktif.nama_lengkap}</span>
+        <button type="button" class="btn-pill-secondary" onclick="keluarSesiAkun()">Keluar</button>
+      `;
+
+      badgeUnduh.textContent = 'Status: Terautentikasi';
+      subjudulUnduh.textContent = `Masuk sebagai ${userAktif.nama_lengkap} (${userAktif.instansi}). Silakan pilih format dataset (CSV / GeoJSON) untuk langsung mengunduh.`;
+
+      if (userAktif.peran === 'PENGEMBANG') {
+        blokPeran.classList.remove('hidden');
+        wadahPeran.innerHTML = `
+          <a href="/admin" class="menu-feature-item">
+            <span class="feat-ico">&#128295;</span>
+            <span class="feat-text">
+              <strong>Dasbor Pengembang</strong>
+              <span>Manajemen poligon PostGIS &amp; sistem</span>
+            </span>
+          </a>
+        `;
+      } else {
+        blokPeran.classList.add('hidden');
+      }
+    }
+
+    function keluarSesiAkun() {
+      localStorage.removeItem('cicipin_user');
+      location.reload();
+    }
+
+    function bukaMenuKiri() {
+      document.getElementById('left-dashboard-menu').classList.add('open');
+      document.getElementById('drawer-backdrop').classList.add('open');
+    }
+
+    function tutupMenuKiri() {
+      document.getElementById('left-dashboard-menu').classList.remove('open');
+      document.getElementById('drawer-backdrop').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') tutupMenuKiri();
+    });
+
+    function buatTileLayer(tipe) {
+      if (tipe === 'SATELIT') {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '&copy; Esri World Imagery'
+        });
+      }
+      if (tipe === 'TOPO') {
+        return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '&copy; Esri Topographic'
+        });
+      }
+      return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri World Street Map'
+      });
+    }
+
+    // Peta pratinjau beranda dikunci
+    const mapPreviewBeranda = L.map('map-preview-beranda', {
+      zoomControl: false,
+      dragging: false,
+      touchZoom: false,
+      doubleClickZoom: false,
+      scrollWheelZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      attributionControl: false
+    }).setView([-6.8988, 107.6355], 16);
+    buatTileLayer('STREET').addTo(mapPreviewBeranda);
+    const layerPreviewBeranda = L.layerGroup().addTo(mapPreviewBeranda);
+
+    const mapSebaran = L.map('map-sebaran').setView([-6.8988, 107.6355], 15);
+    let tileSebaran = buatTileLayer('STREET').addTo(mapSebaran);
+    const layerSebaran = L.layerGroup().addTo(mapSebaran);
+
+    const mapTematik = L.map('map-tematik').setView([-6.8988, 107.6355], 15);
+    let tileTematik = buatTileLayer('STREET').addTo(mapTematik);
+    const layerTematik = L.layerGroup().addTo(mapTematik);
+
+    mapSebaran.on('mousemove', (e) => {
+      document.getElementById('coord-sebaran').textContent =
+        `Koordinat Kursor: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} | EPSG:4326`;
+    });
+    mapTematik.on('mousemove', (e) => {
+      document.getElementById('coord-tematik').textContent =
+        `Koordinat Kursor: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} | EPSG:4326`;
+    });
+
+    function gantiBasemap(target, tipe) {
+      if (target === 'sebaran') {
+        mapSebaran.removeLayer(tileSebaran);
+        tileSebaran = buatTileLayer(tipe).addTo(mapSebaran);
+      } else {
+        mapTematik.removeLayer(tileTematik);
+        tileTematik = buatTileLayer(tipe).addTo(mapTematik);
+      }
+    }
+
+    function bukaTampilan(nama, simpanRiwayat = true) {
+      const labelMap = {
+        beranda: 'Aktif: Beranda',
+        sebaran: 'Aktif: Peta Sebaran Titik',
+        tematik: 'Aktif: Peta Tematik Atribut',
+        unduh: 'Aktif: Unduh Data'
+      };
+      document.getElementById('lbl-posisi-halaman').textContent = labelMap[nama] || 'Aktif: Beranda';
+
+      ['beranda', 'sebaran', 'tematik', 'unduh'].forEach((v) => {
+        document.getElementById(`view-${v}`).classList.toggle('hidden', v !== nama);
+        document.getElementById(`menu-item-${v}`).classList.toggle('active', v === nama);
+      });
+
+      if (simpanRiwayat) {
+        const urlBaru = nama === 'beranda' ? '/' : `/?view=${nama}`;
+        window.history.pushState({ view: nama }, '', urlBaru);
+      }
+
+      tutupMenuKiri();
+
+      if (nama === 'beranda') {
+        setTimeout(() => { mapPreviewBeranda.invalidateSize(); renderPreviewBeranda(); }, 100);
+      } else if (nama === 'sebaran') {
+        setTimeout(() => { mapSebaran.invalidateSize(); renderPetaSebaran(); }, 100);
+      } else if (nama === 'tematik') {
+        setTimeout(() => { mapTematik.invalidateSize(); renderPetaTematik(); }, 100);
+      } else if (nama === 'unduh') {
+        renderKatalogUnduh();
+      }
+    }
+
+    window.addEventListener('popstate', () => {
+      const targetView = new URLSearchParams(window.location.search).get('view') || 'beranda';
+      bukaTampilan(targetView, false);
+    });
+
+    document.querySelectorAll('.rating-row').forEach((row) => {
+      const target = document.getElementById(row.dataset.target);
+      row.querySelectorAll('.rate-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          row.querySelectorAll('.rate-item').forEach((i) => i.classList.remove('selected'));
+          item.classList.add('selected');
+          target.value = item.dataset.val;
+        });
+      });
+    });
+
+    function cariSekolahTerdekat(lat, lng) {
+      if (!cacheSekolah.length) return null;
+      const titikPengirim = turf.point([lng, lat]);
+      let terdekat = null;
+      let jarakMinKm = Infinity;
+
+      cacheSekolah.forEach((s) => {
+        const pusat = turf.centroid(s.geometry);
+        const jarak = turf.distance(titikPengirim, pusat, { units: 'kilometers' });
+        if (jarak < jarakMinKm) {
+          jarakMinKm = jarak;
+          terdekat = { sekolah: s, jarakMeter: Math.round(jarak * 1000) };
+        }
+      });
+
+      return terdekat;
+    }
+
+    async function muatSemuaDataSpasial() {
+      try {
+        const res = await fetch(`${API_URL}/api/publik/peta`);
+        const data = await res.json();
+        cacheSekolah = data.sekolah;
+        cacheAgregat = data.agregat;
+
+        const selectSekolah = document.getElementById('select-lokasi-sekolah');
+        selectSekolah.innerHTML = '';
+        cacheSekolah.forEach((s) => {
+          const opt = document.createElement('option');
+          opt.value = s.npsn;
+          opt.textContent = `${s.nama_sekolah} (${s.jenjang})`;
+          selectSekolah.appendChild(opt);
+        });
+
+        renderDaftarSekolahBeranda();
+        renderKatalogUnduh();
+        gunakanGpsAsli();
+      } catch (err) {
+        document.getElementById('badge-status-geo').textContent = 'Offline';
+        document.getElementById('status-gps-input').value = 'Server backend belum menyala';
+      }
+    }
+
+    function gantiSekolahManual() {
+      const npsn = document.getElementById('select-lokasi-sekolah').value;
+      const sekolah = cacheSekolah.find((s) => s.npsn === npsn);
+      if (!sekolah) return;
+
+      tokenSesi = null;
+      localStorage.removeItem('mbg_db_token');
+
+      if (gpsAsliPerangkat) {
+        cekGeofencingSiswa(npsn, gpsAsliPerangkat.lat, gpsAsliPerangkat.lng, gpsAsliPerangkat.akurasi, true);
+      } else {
+        const pusat = turf.centroid(sekolah.geometry).geometry.coordinates;
+        cekGeofencingSiswa(npsn, pusat[1], pusat[0], 10, false);
+      }
+    }
+
+    function gunakanGpsAsli() {
+      if (!navigator.geolocation) {
+        gantiSekolahManual();
+        return;
+      }
+      document.getElementById('badge-status-geo').textContent = 'Mencari GPS...';
+      document.getElementById('status-gps-input').value = 'Meminta izin lokasi perangkat...';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          gpsAsliPerangkat = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            akurasi: pos.coords.accuracy
+          };
+          const hasilTerdekat = cariSekolahTerdekat(gpsAsliPerangkat.lat, gpsAsliPerangkat.lng);
+          if (hasilTerdekat) {
+            document.getElementById('select-lokasi-sekolah').value = hasilTerdekat.sekolah.npsn;
+          }
+          gantiSekolahManual();
+        },
+        () => {
+          gpsAsliPerangkat = null;
+          gantiSekolahManual();
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    async function cekGeofencingSiswa(npsn, lat, lng, akurasi, isGpsAsli) {
+      koordinatSiswa = { lat, lng, akurasi };
+      renderPreviewBeranda();
+
+      try {
+        const res = await fetch(`${API_URL}/api/sesi/inisialisasi`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            npsn,
+            longitude: lng,
+            latitude: lat,
+            akurasi_gps: akurasi,
+            token_tersimpan: tokenSesi
+          })
+        });
+        const hasil = await res.json();
+        if (!res.ok) {
+          document.getElementById('badge-status-geo').textContent = 'Gagal Validasi';
+          document.getElementById('status-gps-input').value = hasil.message;
+          return;
+        }
+        tokenSesi = hasil.data.token_hash;
+        localStorage.setItem('mbg_db_token', tokenSesi);
+        document.getElementById('badge-status-geo').textContent = hasil.data.dalam_zona ? 'Dalam Zona' : 'GPS Terekam';
+        document.getElementById('status-gps-input').value =
+          `${lat.toFixed(5)}, ${lng.toFixed(5)} (${isGpsAsli ? 'GPS Perangkat' : 'Titik Sekolah'})`;
+        document.getElementById('form-lapor-mbg').classList.toggle('hidden', hasil.data.sudah_mengisi);
+        document.getElementById('box-sudah-lapor').classList.toggle('hidden', !hasil.data.sudah_mengisi);
+      } catch (err) {
+        document.getElementById('status-gps-input').value = 'Gagal terhubung ke server';
+      }
+    }
+
+    function renderDaftarSekolahBeranda() {
+      const listBox = document.getElementById('ringkasan-sekolah-beranda');
+      listBox.innerHTML = '';
+      cacheSekolah.forEach((s) => {
+        const row = document.createElement('div');
+        row.className = 'subcard-item';
+        row.innerHTML = `
+          <div>
+            <strong>${s.nama_sekolah}</strong>
+            <small>Jenjang ${s.jenjang} &bull; NPSN ${s.npsn}</small>
+          </div>
+          <span style="font-weight:700; color:#dc2626; font-size:12px;">Lokasi Aktif</span>
+        `;
+        listBox.appendChild(row);
+      });
+    }
+
+    function renderPreviewBeranda() {
+      layerPreviewBeranda.clearLayers();
+      if (!cacheSekolah.length) return;
+
+      const npsnAktif = document.getElementById('select-lokasi-sekolah').value;
+      let targetSekolah = cacheSekolah.find((s) => s.npsn === npsnAktif) || cacheSekolah[0];
+      let jarakTeks = '';
+
+      if (gpsAsliPerangkat) {
+        const terdekat = cariSekolahTerdekat(gpsAsliPerangkat.lat, gpsAsliPerangkat.lng);
+        if (terdekat) {
+          targetSekolah = terdekat.sekolah;
+          jarakTeks = terdekat.jarakMeter < 1000
+            ? `${terdekat.jarakMeter} m`
+            : `${(terdekat.jarakMeter / 1000).toFixed(2)} km`;
+        }
+      }
+
+      const pusatSekolah = turf.centroid(targetSekolah.geometry).geometry.coordinates;
+      const latSekolah = pusatSekolah[1];
+      const lngSekolah = pusatSekolah[0];
+
+      document.getElementById('jml-sekolah-tag').textContent = jarakTeks ? `Jarak ~${jarakTeks}` : targetSekolah.jenjang;
+      document.getElementById('subjudul-peta-terdekat').textContent =
+        `${targetSekolah.nama_sekolah} (${targetSekolah.jenjang})`;
+
+      // Poligon & titik sekolah terdekat (tetap warna biru seperti sebelumnya)
+      L.geoJSON(targetSekolah.geometry, {
+        style: { color: '#0284c7', weight: 2, fillColor: '#0284c7', fillOpacity: 0.14 }
+      }).addTo(layerPreviewBeranda);
+
+      L.circleMarker([latSekolah, lngSekolah], {
+        radius: 9,
+        color: '#ffffff',
+        weight: 2.5,
+        fillColor: '#0284c7',
+        fillOpacity: 1
+      }).addTo(layerPreviewBeranda).bindTooltip(targetSekolah.nama_sekolah, { permanent: false, direction: 'top' });
+
+      const bounds = L.latLngBounds([[latSekolah, lngSekolah]]);
+
+      // Marker GPS pengirim (tetap merah seperti sebelumnya)
+      const latPengirim = gpsAsliPerangkat ? gpsAsliPerangkat.lat : (koordinatSiswa ? koordinatSiswa.lat : latSekolah);
+      const lngPengirim = gpsAsliPerangkat ? gpsAsliPerangkat.lng : (koordinatSiswa ? koordinatSiswa.lng : lngSekolah);
+
+      const ikonGps = L.divIcon({
+        className: '',
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:#dc2626;border:3px solid #ffffff;box-shadow:0 0 0 3px rgba(220,38,38,0.28);"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+
+      L.marker([latPengirim, lngPengirim], { icon: ikonGps })
+        .addTo(layerPreviewBeranda)
+        .bindTooltip('Posisi GPS Pengirim', { permanent: false, direction: 'bottom' });
+
+      bounds.extend([latPengirim, lngPengirim]);
+
+      if (latPengirim !== latSekolah || lngPengirim !== lngSekolah) {
+        L.polyline([[latPengirim, lngPengirim], [latSekolah, lngSekolah]], {
+          color: '#0f766e',
+          weight: 2,
+          dashArray: '5, 6'
+        }).addTo(layerPreviewBeranda);
+      }
+
+      mapPreviewBeranda.fitBounds(bounds, { padding: [45, 45], maxZoom: 16 });
+    }
+
+    document.getElementById('form-lapor-mbg').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!tokenSesi || !koordinatSiswa) return;
+
+      const btn = document.getElementById('btn-kirim-lapor');
+      btn.disabled = true;
+      btn.textContent = 'Mengirim Umpan Balik...';
+
+      const keluhan = Array.from(document.querySelectorAll('input[name="keluhan"]:checked')).map((el) => el.value);
+      const fd = new FormData();
+      fd.append('token_hash', tokenSesi);
+      fd.append('menu_diterima', document.getElementById('in-menu-lauk').value.trim());
+      fd.append('tanggal_kejadian', document.getElementById('in-tanggal-tiba').value);
+      fd.append('jam_tiba', document.getElementById('in-jam-tiba').value);
+      fd.append('skor_rasa', document.getElementById('in-rasa').value);
+      fd.append('skor_kesegaran', document.getElementById('in-segar').value);
+      fd.append('skor_porsi', document.getElementById('in-porsi').value);
+      fd.append('skor_ketepatan_waktu', document.getElementById('in-waktu').value);
+      fd.append('kategori_keluhan', JSON.stringify(keluhan));
+      fd.append('deskripsi_keluhan', document.getElementById('in-deskripsi').value.trim());
+      fd.append('longitude', koordinatSiswa.lng);
+      fd.append('latitude', koordinatSiswa.lat);
+      fd.append('akurasi_gps', koordinatSiswa.akurasi);
+      fd.append('foto_bukti', document.getElementById('in-foto').files[0]);
+
+      try {
+        const res = await fetch(`${API_URL}/api/umpan-balik`, { method: 'POST', body: fd });
+        if (!res.ok) {
+          const errData = await res.json();
+          alert(errData.message);
+          btn.disabled = false;
+          btn.textContent = 'Kirim Umpan Balik';
+          return;
+        }
+        document.getElementById('form-lapor-mbg').classList.add('hidden');
+        document.getElementById('box-sudah-lapor').classList.remove('hidden');
+        await muatSemuaDataSpasial();
+      } catch (err) {
+        alert('Gangguan koneksi server.');
+        btn.disabled = false;
+      }
+    });
+
+    function resetSesiUji() {
+      localStorage.removeItem('mbg_db_token');
+      location.reload();
+    }
+
+    function renderPetaSebaran() {
+      layerSebaran.clearLayers();
+      const bounds = L.latLngBounds();
+
+      cacheSekolah.forEach((s) => {
+        // Poligon zona sekolah tetap biru seperti sebelumnya
+        const poly = L.geoJSON(s.geometry, {
+          style: { color: '#0284c7', weight: 2, fillColor: '#0284c7', fillOpacity: 0.14 }
+        }).addTo(layerSebaran);
+        bounds.extend(poly.getBounds());
+
+        const pusat = turf.centroid(s.geometry).geometry.coordinates;
+        const ag = cacheAgregat.find((a) => a.npsn === s.npsn);
+        const jml = ag ? ag.total_laporan : 0;
+
+        // Warna marker mengikuti aturan kategori mutu/keluhan sebelumnya
+        let warna = '#0284c7';
+        let kategori = 'Belum Ada Laporan';
+        if (ag && jml > 0) {
+          if (ag.persen_keluhan > 40 || ag.indeks_mutu < 3.5) {
+            warna = '#dc2626';
+            kategori = 'Keluhan Tinggi';
+          } else if (ag.persen_keluhan > 0 || ag.indeks_mutu < 4.0) {
+            warna = '#f59e0b';
+            kategori = 'Perlu Perhatian';
+          } else {
+            warna = '#15803d';
+            kategori = 'Baik';
+          }
+        }
+
+        const ukuran = jml > 0 ? Math.min(32 + jml * 1.1, 52) : 26;
+        const ikon = L.divIcon({
+          className: '',
+          html: `<div style="width:${ukuran}px;height:${ukuran}px;border-radius:50%;background:${warna};color:#fff;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">${jml}</div>`,
+          iconSize: [ukuran, ukuran],
+          iconAnchor: [ukuran / 2, ukuran / 2]
+        });
+
+        L.marker([pusat[1], pusat[0]], { icon: ikon }).addTo(layerSebaran).bindPopup(`
+          <div style="font-size:12.5px;">
+            <strong>${s.nama_sekolah}</strong> (${s.jenjang})<br>
+            Status Umum: <strong>${kategori}</strong><br>
+            <small style="color:#6b7280;">Unduh dataset pada menu Unduh Data untuk rincian laporan.</small>
+          </div>
+        `);
+      });
+
+      if (bounds.isValid()) mapSebaran.fitBounds(bounds, { padding: [45, 45] });
+    }
+
+    function renderPetaTematik() {
+      layerTematik.clearLayers();
+      const atribut = document.getElementById('pilih-atribut-tematik').value;
+      const legendaBox = document.getElementById('isi-legenda-tematik');
+      const bounds = L.latLngBounds();
+      const modeKeluhan = atribut === 'persen_keluhan';
+
+      if (modeKeluhan) {
+        legendaBox.innerHTML = `
+          <div class="leg-row"><span class="leg-box" style="background:#15803d;"></span>Kelas 1: Nihil Keluhan</div>
+          <div class="leg-row"><span class="leg-box" style="background:#0284c7;"></span>Kelas 2: Keluhan Rendah</div>
+          <div class="leg-row"><span class="leg-box" style="background:#f59e0b;"></span>Kelas 3: Keluhan Sedang</div>
+          <div class="leg-row"><span class="leg-box" style="background:#dc2626;"></span>Kelas 4: Keluhan Tinggi</div>
+        `;
+      } else {
+        legendaBox.innerHTML = `
+          <div class="leg-row"><span class="leg-box" style="background:#15803d;"></span>Kelas 1: Sangat Baik</div>
+          <div class="leg-row"><span class="leg-box" style="background:#0284c7;"></span>Kelas 2: Baik</div>
+          <div class="leg-row"><span class="leg-box" style="background:#f59e0b;"></span>Kelas 3: Cukup</div>
+          <div class="leg-row"><span class="leg-box" style="background:#dc2626;"></span>Kelas 4: Perlu Perbaikan</div>
+        `;
+      }
+
+      cacheSekolah.forEach((s) => {
+        const ag = cacheAgregat.find((a) => a.npsn === s.npsn);
+        let warna = '#94a3b8';
+        let kelasLabel = 'Belum Terklasifikasi';
+
+        if (ag && ag.total_laporan > 0) {
+          const val = Number(ag[atribut] || 0);
+          if (modeKeluhan) {
+            if (val === 0) { warna = '#15803d'; kelasLabel = 'Nihil Keluhan'; }
+            else if (val <= 25) { warna = '#0284c7'; kelasLabel = 'Keluhan Rendah'; }
+            else if (val <= 50) { warna = '#f59e0b'; kelasLabel = 'Keluhan Sedang'; }
+            else { warna = '#dc2626'; kelasLabel = 'Keluhan Tinggi'; }
+          } else {
+            if (val >= 4.5) { warna = '#15803d'; kelasLabel = 'Sangat Baik'; }
+            else if (val >= 3.75) { warna = '#0284c7'; kelasLabel = 'Baik'; }
+            else if (val >= 3.0) { warna = '#f59e0b'; kelasLabel = 'Cukup'; }
+            else { warna = '#dc2626'; kelasLabel = 'Perlu Perbaikan'; }
+          }
+        }
+
+        const poly = L.geoJSON(s.geometry, {
+          style: { color: '#064e3b', weight: 2, fillColor: warna, fillOpacity: 0.68 }
+        }).addTo(layerTematik).bindPopup(`
+          <strong>${s.nama_sekolah}</strong><br>
+          Klasifikasi Tematik: <strong>${kelasLabel}</strong><br>
+          <small style="color:#6b7280;">Unduh dataset untuk melihat skor numerik detail.</small>
+        `);
+        bounds.extend(poly.getBounds());
+
+        const pusat = turf.centroid(s.geometry).geometry.coordinates;
+        L.marker([pusat[1], pusat[0]], {
+          icon: L.divIcon({
+            className: '',
+            html: `<div class="label-tematik">${s.nama_sekolah.split(' ')[0]}: ${kelasLabel}</div>`,
+            iconSize: [155, 24],
+            iconAnchor: [77, 12]
+          })
+        }).addTo(layerTematik);
+      });
+
+      if (bounds.isValid()) mapTematik.fitBounds(bounds, { padding: [45, 45] });
+    }
+
+    function renderKatalogUnduh() {
+      const grid = document.getElementById('grid-katalog-unduh');
+      if (!grid) return;
+
+      const paketList = [
+        {
+          kode: 'SEMUA',
+          judul: 'Dataset Gabungan Seluruh Sekolah',
+          subjudul: 'Kompilasi lengkap atribut menu lauk, jam tiba, penilaian 4 aspek mutu, kategori keluhan, dan koordinat titik sekolah (EPSG:4326).',
+          tag: 'Kompilasi Wilayah'
+        },
+        ...cacheSekolah.map((s) => ({
+          kode: s.npsn,
+          judul: s.nama_sekolah,
+          subjudul: `Paket data spasial dan non-spasial khusus satuan pendidikan jenjang ${s.jenjang} (NPSN ${s.npsn}).`,
+          tag: `Jenjang ${s.jenjang}`
+        }))
+      ];
+
+      grid.innerHTML = '';
+      paketList.forEach((p) => {
+        const card = document.createElement('article');
+        card.className = 'catalog-card';
+        card.innerHTML = `
+          <div class="catalog-thumb">
+            <span class="catalog-badge">${p.tag}</span>
+            <div style="font-size:12px; font-weight:700; color:#991b1b;">
+              Format Tersedia: CSV &amp; GeoJSON (EPSG:4326)
+            </div>
+          </div>
+          <div class="catalog-body">
+            <div>
+              <h3>${p.judul}</h3>
+              <p>${p.subjudul}</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn-pill-primary" style="flex:1; justify-content:center;" onclick="prosesUnduhDataset('${p.kode}', 'CSV')">
+                Unduh CSV
+              </button>
+              <button type="button" class="btn-pill-secondary" style="flex:1; justify-content:center;" onclick="prosesUnduhDataset('${p.kode}', 'GEOJSON')">
+                Unduh GeoJSON
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function prosesUnduhDataset(kodeNpsn, format) {
+      if (!userAktif) {
+        window.location.href = `/masuk?page=unduh&paket=${encodeURIComponent(kodeNpsn)}`;
+        return;
+      }
+
+      const res = await fetch('/api/dataset/unduh');
+      const data = await res.json();
+      const daftar = kodeNpsn === 'SEMUA'
+        ? data.laporan
+        : data.laporan.filter((l) => l.npsn === kodeNpsn);
+
+      const namaBerkas = kodeNpsn === 'SEMUA' ? 'semua_sekolah' : `npsn_${kodeNpsn}`;
+      const tgl = new Date().toISOString().slice(0, 10);
+
+      if (format === 'CSV') {
+        const header = [
+          'id_umpan_balik', 'tanggal_distribusi', 'jam_tiba', 'npsn', 'nama_sekolah', 'jenjang',
+          'sumber_laporan', 'menu_diterima', 'skor_rasa', 'skor_kesegaran', 'skor_porsi',
+          'skor_ketepatan_waktu', 'kategori_keluhan', 'deskripsi_keluhan',
+          'lintang_sekolah', 'bujur_sekolah', 'waktu_lapor'
+        ];
+        const rows = daftar.map((l) => [
+          l.id_umpan_balik,
+          l.tanggal_distribusi,
+          l.jam_tiba || '',
+          l.npsn,
+          `"${(l.nama_sekolah || '').replace(/"/g, '""')}"`,
+          l.jenjang,
+          l.sumber_laporan || 'SISWA',
+          `"${(l.menu_diterima || '').replace(/"/g, '""')}"`,
+          l.skor_rasa,
+          l.skor_kesegaran,
+          l.skor_porsi,
+          l.skor_ketepatan_waktu,
+          `"${(l.kategori_keluhan || []).join(';')}"`,
+          `"${(l.deskripsi_keluhan || '').replace(/"/g, '""')}"`,
+          l.lintang_sekolah,
+          l.bujur_sekolah,
+          l.waktu_lapor
+        ].join(','));
+
+        const blob = new Blob([[header.join(','), ...rows].join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `cicipin_${namaBerkas}_${tgl}.csv`;
+        link.click();
+      } else {
+        const fc = {
+          type: 'FeatureCollection',
+          crs: {
+            type: 'name',
+            properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' }
+          },
+          features: daftar.map((l) => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [Number(l.bujur_sekolah), Number(l.lintang_sekolah)]
+            },
+            properties: {
+              id_umpan_balik: l.id_umpan_balik,
+              tanggal_distribusi: l.tanggal_distribusi,
+              jam_tiba: l.jam_tiba || '',
+              npsn: l.npsn,
+              nama_sekolah: l.nama_sekolah,
+              jenjang: l.jenjang,
+              sumber_laporan: l.sumber_laporan || 'SISWA',
+              menu_diterima: l.menu_diterima || '',
+              skor_rasa: l.skor_rasa,
+              skor_kesegaran: l.skor_kesegaran,
+              skor_porsi: l.skor_porsi,
+              skor_ketepatan_waktu: l.skor_ketepatan_waktu,
+              kategori_keluhan: (l.kategori_keluhan || []).join('; '),
+              deskripsi_keluhan: l.deskripsi_keluhan,
+              lintang_sekolah: Number(l.lintang_sekolah),
+              bujur_sekolah: Number(l.bujur_sekolah),
+              waktu_lapor: l.waktu_lapor
+            }
+          }))
+        };
+
+        const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/geo+json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `cicipin_${namaBerkas}_${tgl}.geojson`;
+        link.click();
+      }
+    }
+
+    siapkanIdentitasPeran();
+    muatSemuaDataSpasial().then(() => {
+      const targetView = new URLSearchParams(window.location.search).get('view');
+      if (targetView === 'sebaran' || targetView === 'tematik' || targetView === 'unduh') {
+        bukaTampilan(targetView, false);
+      }
+    });
+  </script>
+</body>
+</html>
